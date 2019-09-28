@@ -118,3 +118,11 @@ class Author(models.Model):
     def __str__(self):
         """String for representing the Model object."""
         return '{0}, {1}'.format(self.last_name, self.first_name)
+
+    def get_dates(self):
+        birth = "" if not self.date_of_birth else self.date_of_birth
+        death = "" if not self.date_of_death else self.date_of_death
+        return '{0} - {1}'.format(birth, death)
+
+    def get_detail(self):
+        return self.__str__()+" ("+self.get_dates()+")"
