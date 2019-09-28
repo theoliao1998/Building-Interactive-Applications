@@ -1,0 +1,19 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1>Title: {{ author }}</h1>
+  <p>{{ author.get_dates }}</p>
+
+  <div style="margin-left:20px;margin-top:20px">
+    <h4>Books</h4>
+
+    {% for b in author.book_set.all %}
+      <p>
+        <a href="{{ b.get_absolute_url }}">{{ b.title }}</a> <b>({{b.bookinstance_set.all.count}})</b>
+        <br>
+        {{ b.summary }}
+      </p>
+
+    {% endfor %}
+  </div>
+{% endblock %}
