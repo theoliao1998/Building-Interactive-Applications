@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% block title %}<title>Hello World ...</title>{% endblock %}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="wa4e" content="16c222aa19898e5058938167c8ab6c57">
+</head>
+<body>
+<h1> Hello World ... </h1>
+<ul>
+<li><a href="/autos">Autos CRUD</a>
+<ul>
+
+{% if user.is_authenticated %}
+<p>Authenticated as
+<pre>
+Name: {{ user.get_full_name }}
+Email: {{ user.email }}
+Id: {{ user.id }}
+</pre>
+</p>
+<p>You can <a href="/accounts/logout">Logout and login with another account</a></p>
+{% else %}
+<p>You can <a href="/accounts/login">Login</a> if you like.</p>
+{% endif %}
+
+
+</body>
+</html>
