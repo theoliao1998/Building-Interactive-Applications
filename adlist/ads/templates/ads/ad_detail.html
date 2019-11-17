@@ -17,6 +17,9 @@
 {{ ad.text }}
 </p>
 <p>
+Price: ${{ ad.price }}
+</p>
+<p>
 ({{ ad.updated_at|naturaltime }})
 </p>
 {% if user.is_authenticated %}
