@@ -7,10 +7,13 @@ from django.urls import reverse_lazy, reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from ads.forms import CreateForm
 from django.shortcuts import render, redirect, get_object_or_404
-
+from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.db.utils import IntegrityError
+from django.contrib.humanize.templatetags.humanize import naturaltime
+from ads.utils import dump_queries
+
 
 from ads.owner import OwnerListView, OwnerDetailView, OwnerCreateView, OwnerUpdateView, OwnerDeleteView
 
@@ -19,14 +22,35 @@ class AdListView(OwnerListView):
     template_name = "ads/ad_list.html"
 
     def get(self, request) :
-        ad_list = Ad.objects.all()
+        strval =  request.GET.get("search", False)
+        if strval :
+            # Simple title-only search
+            # objects = Post.objects.filter(title__contains=strval).select_related().order_by('-updated_at')[:10]
+
+            # Multi-field search
+            query = Q(title__contains=strval)
+            query.add(Q(text__contains=strval), Q.OR)
+            objects = Ad.objects.filter(query).select_related().order_by('-updated_at')[:10]
+        else :
+            # try both versions with > 4 posts and watch the queries that happen
+            objects = Ad.objects.all().order_by('-updated_at')[:10]
+            # objects = Post.objects.select_related().all().order_by('-updated_at')[:10]
         favorites = list()
         if request.user.is_authenticated:
             # rows = [{'id': 2}]  (A list of rows)
             rows = request.user.favorite_ads.values('id')
             favorites = [ row['id'] for row in rows ]
-        ctx = {'ad_list' : ad_list, 'favorites': favorites}
-        return render(request, self.template_name, ctx)
+
+        # Augment the post_list
+        for obj in objects:
+            obj.natural_updated = naturaltime(obj.updated_at)
+
+        ctx = {'ad_list' : objects, 'search': strval, 'favorites': favorites}
+        retval = render(request, self.template_name, ctx)
+
+        dump_queries()
+        return retval;
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class AddFavoriteView(LoginRequiredMixin, View):
